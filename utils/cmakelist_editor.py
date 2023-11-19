@@ -12,7 +12,7 @@ def include_scripts(script_list): # Adds all Install programs
     appended_scripts = f"install(\n\tPROGRAMS\n\t{all_scripts}\n\tDESTINATION share/${{PROJECT_NAME}}\n)\n"
     return appended_scripts
 
-def appender(dir_list,script_list):
+def appender(dir_list,script_list,mesh_include): 
     Cmake_dir = include_directory(dir_list)
     Cmake_script = include_scripts(script_list)
     with open('CMakeLists.txt','a') as file: #Make sure that the previous funcs dir points to pkg
