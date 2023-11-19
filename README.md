@@ -1,4 +1,4 @@
-# ROS_Autogen
+# ROS2_Autogen
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
