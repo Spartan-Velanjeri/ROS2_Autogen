@@ -37,8 +37,8 @@ import xacro
     """
     return library_stuff
 
-def robot_node_gen(urdf_path,package_name):
-    file_name = os.path.basename(urdf_path)
+def robot_node_gen(urdf_relative_path,package_name):
+    file_name = os.path.basename(urdf_relative_path)
     robot_node_stuff = f"""
     robot_path = os.path.join(get_package_share_directory('{package_name}'))
     xacro_file = os.path.join(robot_path, 'urdf', '{file_name}')
@@ -118,9 +118,9 @@ def finisher():
     """
     return finisher
 
-def launch_generator(package_name,urdf_path,sim_name):
+def launch_generator(package_name,urdf_relative_path,sim_name):
 
-    robot_node_stuff = robot_node_gen(urdf_path,package_name)
+    robot_node_stuff = robot_node_gen(urdf_relative_path,package_name)
     gazebo_stuff,bridge_stuff = gazebo_node_gen(sim_name)
     library_stuff = library_gen()
     finisher_stuff = finisher()

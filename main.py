@@ -22,12 +22,13 @@ def input_func(input_sentence,checker):
         return data
 
     
-def pkg_creator(package_name,launch_file,urdf_path):
+def pkg_creator(package_name,launch_file,urdf_relative_path):
     
     meshes_available = False
 
     subprocess.call(['ros2','pkg','create','--build-type','ament_cmake',package_name])
     main_path = os.getcwd()
+    urdf_path = os.path.join(main_path,urdf_relative_path) 
 
     pkg_path = os.path.join(main_path,package_name)
     os.chdir(pkg_path)
@@ -70,7 +71,7 @@ def pkg_creator(package_name,launch_file,urdf_path):
     
 questions = {}
 questions['package_name'] = 'Package Name : '
-questions['urdf_path'] = "Path to the URDF: "
+questions['urdf_relative_path'] = "Path to the URDF: "
 questions['simulator_used'] = "Simulator of Choice: "
 questions['nodes'] = "Nodes of Choice:"
 # questions['meshes'] = "Would you be using meshes/worlds now or in the future, Y/N? \n Autogen will create an env hook for you, \n so that gazebo can recognise the meshes and worlds for you. RECOMMENDED "
@@ -78,14 +79,14 @@ checker = 1 # Not required for now
 dir_list = ["include", "launch", "src", "urdf","config", "rviz","meshes"]
 script_list = [] # Until nodes start coming
 package_name = input_func(questions['package_name'],checker)
-urdf_path = input_func(questions['urdf_path'],checker)
+urdf_relative_path = input_func(questions['urdf_relative_path'],checker)
 sim_name = 'ignition_gazebo'
 # meshes_required = input_func(questions['meshes'],checker)
 mesh_include = False
 
 launch_file = f"{package_name}.launch.py"
-launch_generator(package_name,urdf_path,sim_name)
-meshes_available = pkg_creator(package_name,launch_file,urdf_path)
+launch_generator(package_name,urdf_relative_path,sim_name)
+meshes_available = pkg_creator(package_name,launch_file,urdf_relative_path)
 # if meshes_available or meshes_required=="Y" or meshes_required=="y":
 #     print("meshes support will be added")
 #     dir_list.append("meshes")
