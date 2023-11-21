@@ -154,8 +154,8 @@ cython_debug/
 
 # My requirement file
 tasks_to_finish.txt
-urdf/
-meshes/
+temp 
+
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
