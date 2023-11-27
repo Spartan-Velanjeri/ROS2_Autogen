@@ -8,6 +8,8 @@ import shutil
 from utils.launch_maker import launch_generator
 import os
 from utils.cmakelist_editor import appender
+import send2trash
+import sys
 
 def input_func(input_sentence,checker):
     data = input(input_sentence)
@@ -25,9 +27,29 @@ def input_func(input_sentence,checker):
 def pkg_creator(package_name,launch_file,urdf_relative_path):
     
     meshes_available = False
+    main_path = os.getcwd()
+    existing_folder = os.path.join(main_path, package_name)
+    if os.path.exists(existing_folder) and os.path.isdir(existing_folder):
+        print("But we gotta a slight problem ! \n")
+        print("Do you want to replace the package",package_name,"\nsince it has the same name as the pkg to be created, Y or N: ")
+        decision = input("Y or N: ")
+    
+        if decision == "Y" or decision =="y":
+            print("Deleting existing pkg to make way for the new one")
+            try:
+                send2trash.send2trash(existing_folder)
+                print(f"Successfully moved '{package_name}' to trash.")
+            except OSError as e:
+                print(f"Failed to move '{package_name}' to trash: {e}")
+                sys.exit(1)
+        else:
+            print("Exiting Program Now")
+            sys.exit(1)
+
+
+
 
     subprocess.call(['ros2','pkg','create','--build-type','ament_cmake',package_name])
-    main_path = os.getcwd()
     urdf_path = os.path.join(main_path,urdf_relative_path) 
 
     pkg_path = os.path.join(main_path,package_name)
@@ -70,19 +92,29 @@ def pkg_creator(package_name,launch_file,urdf_relative_path):
     return meshes_available
     
 questions = {}
-questions['package_name'] = 'Package Name : '
-questions['urdf_relative_path'] = "Path to the URDF: "
-questions['simulator_used'] = "Simulator of Choice: "
+questions['package_name'] = 'Your ROS Package Name (named autogen_pkg by DEFAULT) : '
+questions['urdf_relative_path'] = "Path to the URDF relative from the ROS_Autogen Repo, something like urdf/.... \n\nPath to the URDF :  "
+questions['simulator_used'] = "Simulator of Choice: Currently Supported are \n\n 1)  Ignition_gazebo \n\n 2)  Gazebo Classic (DEFAULT) \n\n 1 or 2: "
 questions['nodes'] = "Nodes of Choice:"
 # questions['meshes'] = "Would you be using meshes/worlds now or in the future, Y/N? \n Autogen will create an env hook for you, \n so that gazebo can recognise the meshes and worlds for you. RECOMMENDED "
 checker = 1 # Not required for now
 dir_list = ["include", "launch", "src", "urdf","config", "rviz","meshes"]
 script_list = [] # Until nodes start coming
+package_name = "autogen_pkg"
 package_name = input_func(questions['package_name'],checker)
+print("\n")
 urdf_relative_path = input_func(questions['urdf_relative_path'],checker)
-sim_name = 'ignition_gazebo'
+print("\n")
+sim_name = input_func(questions['simulator_used'],checker)
+print("\n")
 # meshes_required = input_func(questions['meshes'],checker)
 mesh_include = False
+simulators = {"1":"Ignition Gazebo","2":"Gazebo Classic"}
+
+
+print(" \n ***********************************  ROS_AUTOGEN PROCESSING********************************* \n ")
+
+print("\n \n A New Package named",package_name,"with Robot State Publisher, Joint State Publisher, Rviz and",simulators[sim_name],"coming right up ! \n \n ")
 
 launch_file = f"{package_name}.launch.py"
 launch_generator(package_name,urdf_relative_path,sim_name)

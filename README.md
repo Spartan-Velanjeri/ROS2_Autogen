@@ -5,7 +5,9 @@
 ## Description
 
 Generates packages with launch files automatically from URDF for ROS2 with your required simulator. Built to view URDF quickly on RViz and Gazebo.
-Currently supports Ignition Gazebo Fortress Simulator.
+Currently supports **Ignition Gazebo Fortress** Simulator and **Gazebo Classic** Simulator.
+
+Also adds both **Robot_state_publisher** and **Joint_state_publisher** to test your robot. You could use **teleop** or **joint_state_publisher_gui** for mobile robots and manipulators respectively
 
 ## Table of Contents
 
@@ -30,6 +32,12 @@ An easier way to install both ROS2 and Ignition Gazebo Fortress is to use `apt`:
 
 ```bash
 sudo apt-get install ros-humble-desktop-full
+```
+
+Also do install the [send2trash](https://pypi.org/project/Send2Trash/) python library as it'll allow you to quickly send your older, redundant package to trash if you are creating a new one with the same name.
+
+```bash
+pip install send2trash
 ```
 
 ## Usage
@@ -93,7 +101,7 @@ Note: If you have any other dependencies for your launch, use Rosdep or APT inst
 
 ## Upcoming_Features
 
-1. Support for Gazebo Classic and test with different ROS2 Versions
+1. ~~Support for Gazebo Classic~~ (COMPLETE) and test with different Ignition Gazebo Sim Versions
 2. Support for additional scripts and nodes to be added in launch file
 
 ## Notes

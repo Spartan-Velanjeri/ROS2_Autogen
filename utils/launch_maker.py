@@ -37,9 +37,37 @@ import xacro
     """
     return library_stuff
 
-def robot_node_gen(urdf_relative_path,package_name):
+def robot_node_gen(urdf_relative_path,package_name,sim_name):
     file_name = os.path.basename(urdf_relative_path)
+    if sim_name == "1":
+        entity = f"""
+    spawn_entity = Node(
+    package='ros_gz_sim',
+    executable='create',
+    output='screen',
+    arguments=['-string', doc.toxml(),
+                '-name', '{package_name}',
+                '-allow_renaming', 'true'],
+    )
+    """
+    
+    else:
+        entity = f"""
+    spawn_entity = Node(
+    package='gazebo_ros',
+    executable='spawn_entity.py',
+    arguments=['-entity', '{package_name}',
+                '-file', xacro_file],
+    output='screen'
+    )
+    """
+
+            
+
     robot_node_stuff = f"""
+    
+    use_sim_time = LaunchConfiguration('use_sim_time',default=True)
+
     robot_path = os.path.join(get_package_share_directory('{package_name}'))
     xacro_file = os.path.join(robot_path, 'urdf', '{file_name}')
     doc = xacro.parse(open(xacro_file))
@@ -53,32 +81,48 @@ def robot_node_gen(urdf_relative_path,package_name):
         parameters=[params],
     )
 
-    gz_spawn_entity = Node(
-        package='ros_gz_sim',
-        executable='create',
+    node_joint_state_publisher = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
         output='screen',
-        arguments=['-string', doc.toxml(),
-                    '-name', '{package_name}',
-                    '-allow_renaming', 'true'],
     )
-"""
-    return robot_node_stuff
+
+    """
+    return robot_node_stuff,entity
     
+
 def gazebo_node_gen(sim_name):
-    if sim_name == 'ignition_gazebo':
+
+    if sim_name == '1':
+    
         gazebo_stuff = f"""
-    gz_args = LaunchConfiguration('gz_args',default=' -r -v 4 empty.sdf')
-    use_sim_time = LaunchConfiguration('use_sim_time',default=True)
-        """
-    bridge_stuff = f"""
     bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=['/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock'],
     )
+    launch_gazebo_world = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
+        ]),
+        launch_arguments={{
+            'gz_args': '-r -v 4 "empty.sdf"'
+        }}.items()
+    )
+
     """
 
-    return gazebo_stuff,bridge_stuff
+    else:
+        gazebo_stuff = f"""
+    gazebo_ros_dir = get_package_share_directory('gazebo_ros')
+
+    launch_gazebo_world = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(gazebo_ros_dir, 'launch', 'gazebo.launch.py')),
+    )
+    """
+
+    return gazebo_stuff
 
 def rviz_node(package_name): # Currently displays an empty rviz window for you to add the RobotModel
     #
@@ -101,37 +145,47 @@ def create_launch_file(file_content,file_name):
         file.write("\n")
         file.write(file_content)
 
-def finisher():
-    finisher = f"""
+def finisher(sim_name):
+    if sim_name == '1':
+        finisher = f"""
     return LaunchDescription([
         bridge,
         # Launch gazebo environment
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                [os.path.join(get_package_share_directory('ros_gz_sim'),
-                            'launch', 'gz_sim.launch.py')]),
-            launch_arguments=[('gz_args', [' -r -v 4 empty.sdf'])]),
+        launch_gazebo_world,
         node_robot_state_publisher,
-        gz_spawn_entity,
+        node_joint_state_publisher,
+        spawn_entity,
         rviz_node,
     ])
     """
+
+    else:
+        finisher = f"""
+    return LaunchDescription([
+        # Launch gazebo environment
+        launch_gazebo_world,
+        node_robot_state_publisher,
+        node_joint_state_publisher,
+        spawn_entity,
+        rviz_node,
+    ])
+    """        
     return finisher
 
 def launch_generator(package_name,urdf_relative_path,sim_name):
 
-    robot_node_stuff = robot_node_gen(urdf_relative_path,package_name)
-    gazebo_stuff,bridge_stuff = gazebo_node_gen(sim_name)
+    robot_node_stuff,entity_stuff = robot_node_gen(urdf_relative_path,package_name,sim_name)
+    gazebo_stuff = gazebo_node_gen(sim_name)
     library_stuff = library_gen()
-    finisher_stuff = finisher()
+    finisher_stuff = finisher(sim_name)
     rviz_stuff = rviz_node(package_name)
 
     final = f"""
 {library_stuff}
 def generate_launch_description():
-    {gazebo_stuff}
     {robot_node_stuff}
-    {bridge_stuff}
+    {gazebo_stuff}
+    {entity_stuff}
     {rviz_stuff}
     {finisher_stuff}
     """
