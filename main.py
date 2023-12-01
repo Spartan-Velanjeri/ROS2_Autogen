@@ -63,6 +63,7 @@ def pkg_creator(package_name,launch_file,urdf_relative_path):
     pkg_config_path = os.path.join(pkg_path,"config") #Inside created pkg
     pkg_rviz_path = os.path.join(pkg_path,"rviz") #Inside created pkg
     pkg_meshes_path = os.path.join(pkg_path,"meshes") #Inside created pkg
+    pkg_env_hooks_path = os.path.join(pkg_path,"env-hooks") # Inside created pkg
 
     launch_automaton_path = os.path.join(main_path,launch_file) # In source
     urdf_automaton_path = os.path.join(main_path,"urdf") # In source
@@ -83,6 +84,15 @@ def pkg_creator(package_name,launch_file,urdf_relative_path):
     if os.path.isdir(meshes_automaton_path): # Only if you have additional meshes, it'll create a folder in the pkg
         shutil.copytree(meshes_automaton_path,pkg_meshes_path,dirs_exist_ok=True)
         meshes_available=True
+        os.mkdir(pkg_env_hooks_path)
+        env_hook_file = os.path.join(main_path,pkg_env_hooks_path,f"{package_name}.sh.in")
+        with open(env_hook_file,'w') as file:
+            file.writelines('ament_prepend_unique_value GAZEBO_MODEL_PATH "@CMAKE_INSTALL_PREFIX@/share"')
+            file.write("\n")
+            file.writelines('ament_prepend_unique_value GZ_SIM_RESOURCE_PATH "@CMAKE_INSTALL_PREFIX@/share"')
+            file.write("\n")
+            file.writelines('ament_prepend_unique_value IGN_GAZEBO_RESOURCE_PATH "@CMAKE_INSTALL_PREFIX@/share"')
+
     
 
     shutil.copy(launch_automaton_path,pkg_launch_path) # Copies launch file to launch folder inside the pkg
@@ -96,6 +106,7 @@ questions['package_name'] = 'Your ROS Package Name (named autogen_pkg by DEFAULT
 questions['urdf_relative_path'] = "Path to the URDF relative from the ROS_Autogen Repo, something like urdf/.... \n\nPath to the URDF :  "
 questions['simulator_used'] = "Simulator of Choice: Currently Supported are \n\n 1)  Ignition_gazebo \n\n 2)  Gazebo Classic (DEFAULT) \n\n 1 or 2: "
 questions['nodes'] = "Nodes of Choice:"
+questions['jsp-gui'] = "Do you want to test your joints with the joint state publisher GUI? \n Y or N: "
 # questions['meshes'] = "Would you be using meshes/worlds now or in the future, Y/N? \n Autogen will create an env hook for you, \n so that gazebo can recognise the meshes and worlds for you. RECOMMENDED "
 checker = 1 # Not required for now
 dir_list = ["include", "launch", "src", "urdf","config", "rviz","meshes"]
@@ -104,25 +115,34 @@ package_name = "autogen_pkg"
 package_name = input_func(questions['package_name'],checker)
 print("\n")
 urdf_relative_path = input_func(questions['urdf_relative_path'],checker)
+base_name, extension = os.path.splitext(urdf_relative_path)
+print(base_name)
 print("\n")
 sim_name = input_func(questions['simulator_used'],checker)
 print("\n")
 # meshes_required = input_func(questions['meshes'],checker)
+jsp_gui = input_func(questions['jsp-gui'],checker)
+jsp_gui = 1 if jsp_gui =="Y" or jsp_gui == "y" else 0
+if jsp_gui:
+    print("Make sure to install Joint_state_publisher_gui")
+print("\n")
+
 mesh_include = False
 simulators = {"1":"Ignition Gazebo","2":"Gazebo Classic"}
 
 
+
 print(" \n ***********************************  ROS_AUTOGEN PROCESSING********************************* \n ")
 
-print("\n \n A New Package named",package_name,"with Robot State Publisher, Joint State Publisher, Rviz and",simulators[sim_name],"coming right up ! \n \n ")
+# print("\n \n A New Package named",package_name,"with Robot State Publisher, Joint State Publisher, Rviz and",simulators[sim_name],"coming right up ! \n \n ")
 
 launch_file = f"{package_name}.launch.py"
-launch_generator(package_name,urdf_relative_path,sim_name)
+launch_generator(package_name,urdf_relative_path,sim_name,jsp_gui)
 meshes_available = pkg_creator(package_name,launch_file,urdf_relative_path)
 # if meshes_available or meshes_required=="Y" or meshes_required=="y":
 #     print("meshes support will be added")
 #     dir_list.append("meshes")
 #     mesh_include = True
-appender(dir_list,script_list,mesh_include) #Make sure the previous func brings you into the pkg dir
+appender(dir_list,script_list) #Make sure the previous func brings you into the pkg dir
 
 print(f"Your Package is complete and called {package_name}. Make sure to copy it in colcon workspace and build")

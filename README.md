@@ -5,9 +5,9 @@
 ## Description
 
 Generates packages with launch files automatically from URDF for ROS2 with your required simulator. Built to view URDF quickly on RViz and Gazebo.
-Currently supports **Ignition Gazebo Fortress** Simulator and **Gazebo Classic** Simulator.
+Currently supports **[Ignition Gazebo Fortress](https://gazebosim.org/docs/fortress/tutorials)** and **[Gazebo Classic](https://classic.gazebosim.org)** .
 
-Also adds both **Robot_state_publisher** and **Joint_state_publisher** to test your robot. You could use **teleop** or **joint_state_publisher_gui** for mobile robots and manipulators respectively
+Also adds both **[Robot_state_publisher](https://index.ros.org/p/robot_state_publisher/github-ros-robot_state_publisher)** and **[Joint_state_publisher](https://index.ros.org/p/joint_state_publisher/)** **[joint_state_publisher_gui](https://index.ros.org/p/joint_state_publisher_gui/github-ros-joint_state_publisher/)** if required to test your robot.
 
 ## Table of Contents
 
@@ -15,7 +15,7 @@ Also adds both **Robot_state_publisher** and **Joint_state_publisher** to test y
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [Upcoming Features](#Upcoming_Features)
-- [Notes](#Notes)
+- [Troubleshooting](#Troubleshooting)
 
 ## Installation
 
@@ -32,6 +32,12 @@ An easier way to install both ROS2 and Ignition Gazebo Fortress is to use `apt`:
 
 ```bash
 sudo apt-get install ros-humble-desktop-full
+```
+
+Also if you would like to test the joint-states of your robot, don't forget to install joint-state-publisher-gui with 
+
+```bash
+sudo apt-get install ros-humble-joint-state-publisher-gui
 ```
 
 Also do install the [send2trash](https://pypi.org/project/Send2Trash/) python library as it'll allow you to quickly send your older, redundant package to trash if you are creating a new one with the same name.
@@ -104,6 +110,21 @@ Note: If you have any other dependencies for your launch, use Rosdep or APT inst
 1. ~~Support for Gazebo Classic~~ (COMPLETE) and test with different Ignition Gazebo Sim Versions
 2. Support for additional scripts and nodes to be added in launch file
 
-## Notes
+## Troubleshooting
 
-1. If you have meshes, make sure to launch from inside the src folder of your colcon workspace to view all the meshes on the simulator. For some reason, it is not showing up when launching from another directory
+1. ~~If you have meshes, make sure to launch from inside the src folder of your colcon workspace to view all the meshes on the simulator. For some reason, it is not showing up when launching from another directory~~ With the help of env-hooks, you can launch from anywhere you want as long as you are sourcing the workspace.
+
+2. If you are spawning the robot with Gazebo Classic, make sure that the main urdf is of format .urdf and NOT .urdf.xacro as it'll cause some troubles while trying to parse it on Gazebo Classic. 
+Just run the command after sourcing the description pkg of the robot to convert the .urdf.
+xacro to just .urdf 
+
+    ```bash
+    ros2 run xacro xacro your_file.urdf.xacro > your_file.urdf
+    ```
+
+Then Copy THIS .urdf file into the ROS Autogen's urdf folder along with all the other files from the description pkg's urdf folder.
+
+When running the main.py, make sure to point to this .urdf when asked about the path to the URDF.
+
+There's no need to change anything with Ignition Gazebo as it can work with both .urdf and .urdf.xacro
+
