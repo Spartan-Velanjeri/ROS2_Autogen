@@ -7,7 +7,7 @@
 Generates packages with launch files automatically from URDF for ROS2 with your required simulator. Built to view URDF quickly on RViz and Gazebo.
 Currently supports **[Ignition Gazebo Fortress](https://gazebosim.org/docs/fortress/tutorials)** and **[Gazebo Classic](https://classic.gazebosim.org)** .
 
-Also adds both **[Robot_state_publisher](https://index.ros.org/p/robot_state_publisher/github-ros-robot_state_publisher)** and **[Joint_state_publisher](https://index.ros.org/p/joint_state_publisher/)** **[joint_state_publisher_gui](https://index.ros.org/p/joint_state_publisher_gui/github-ros-joint_state_publisher/)** if required to test your robot.
+Also adds both **[Robot_state_publisher](https://index.ros.org/p/robot_state_publisher/github-ros-robot_state_publisher)**, **[Joint_state_publisher](https://index.ros.org/p/joint_state_publisher/)** and **[joint_state_publisher_gui](https://index.ros.org/p/joint_state_publisher_gui/github-ros-joint_state_publisher/)** if required to test your robot.
 
 ## Table of Contents
 
@@ -61,7 +61,7 @@ To utilize this project, follow these steps:
    python3 main.py 
 
 3.  **Provide package name and URDF path:**
-    When prompted, enter your package name and copy the RELATIVE path of the URDF present inside the repository (usually urdf/your_urdf.urdf). This will generate your ROS2 package inside the repository.
+    When prompted, enter your package name (IMPORTANT: Make sure to name it with the **same pkg name** as present in the URDF file especially if the URDF file points to other resources(meshes,other urdfs) with the pkg name as path) and copy the RELATIVE path of the URDF present inside the repository (usually urdf/your_urdf.urdf). This will generate your ROS2 package inside the repository.
 
 4.  **Copy the package into your workspace:**
     Once the package is generated, copy it into your ROS2 workspace, then build and launch it.
