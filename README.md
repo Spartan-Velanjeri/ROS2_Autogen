@@ -112,7 +112,7 @@ Note: If you have any other dependencies for your launch, use Rosdep or APT inst
 
 ## Troubleshooting
 
-1. ~~If you have meshes, make sure to launch from inside the src folder of your colcon workspace to view all the meshes on the simulator. For some reason, it is not showing up when launching from another directory~~ With the help of env-hooks, you can launch from anywhere you want as long as you are sourcing the workspace.
+1. ~~If you have meshes, make sure to launch from inside the src folder of your colcon workspace to view all the meshes on the simulator. For some reason, it is not showing up when launching from another directory~~ Added env-hook support to launch your robot from wherever you want.
 
 2. If you are spawning the robot with Gazebo Classic, make sure that the main urdf is of format .urdf and NOT .urdf.xacro as it'll cause some troubles while trying to parse it on Gazebo Classic. 
 Just run the command after sourcing the description pkg of the robot to convert the .urdf.
