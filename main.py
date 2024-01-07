@@ -1,148 +1,99 @@
-#
-# We are using this program to auto-generate ROS packages with just a URDF folder (should include controllers in Config)
-# The result would be a ROS_pkg with Launch files, package.xml and CMakelists.txt
-# You can then directly build this ROS_pkg in your Colcon workspace
+import tkinter as tk
+from tkinter import font
+from generator import generator
 
-import subprocess
-import shutil
-from utils.launch_maker import launch_generator
-import os
-from utils.cmakelist_editor import appender
-import send2trash
-import sys
+def get_inputs():
+    package_name = entry_packagename.get()
+    file_path = entry_filepath.get()
+    sim_name = radio_var.get()
+    jsp_gui = radio_jsp.get()
 
-def input_func(input_sentence,checker):
-    data = input(input_sentence)
-    if checker != 1:
-        condition = input("Is %s fine? Y or N" % data)
+    # Do something with the inputs (for example, print them)
+    print("Package Name:", package_name)
+    print("File Path:", file_path)
+    print("Gazebo Type:", sim_name)
+    print(jsp_gui)
+    generator(package_name,file_path,sim_name,jsp_gui)
 
-        if (condition == "Y" or condition == "y"):
-            return data
-        else:
-            input_func(input_sentence)
-    else:
-        return data
+def on_window_resize(event):
+    # Update elements on window resize
+    new_width = root.winfo_width()
+    new_height = root.winfo_height()
+    #print(f"Window resized to Width: {new_width}, Height: {new_height}")
 
-    
-def pkg_creator(package_name,launch_file,urdf_relative_path):
-    
-    meshes_available = False
-    main_path = os.getcwd()
-    existing_folder = os.path.join(main_path, package_name)
-    if os.path.exists(existing_folder) and os.path.isdir(existing_folder):
-        print("But we gotta a slight problem ! \n")
-        print("Do you want to replace the package",package_name,"\nsince it has the same name as the pkg to be created, Y or N: ")
-        decision = input("Y or N: ")
-    
-        if decision == "Y" or decision =="y":
-            print("Deleting existing pkg to make way for the new one")
-            try:
-                send2trash.send2trash(existing_folder)
-                print(f"Successfully moved '{package_name}' to trash.")
-            except OSError as e:
-                print(f"Failed to move '{package_name}' to trash: {e}")
-                sys.exit(1)
-        else:
-            print("Exiting Program Now")
-            sys.exit(1)
+# Create the main window
+root = tk.Tk()
+root.title("ROS_Autogen")
+root.geometry("550x500")  # Set initial window size
+
+# Customize fonts and colors
+bg_color = "#121212"  # Dark background color
+fg_color = "#00FF00"  # Green text color
+entry_bg_color = "#303030"  # Darker entry background color
+entry_fg_color = "#00FF00"  # Entry text color
+
+# Set the background color
+root.config(bg=bg_color)
+
+# Prevent window from resizing based on its contents
+root.pack_propagate(False)
+
+# Create a custom font
+custom_font = font.Font(family="Courier", size=12)
 
 
+# Package Name input
+label_packagename = tk.Label(root, text="Package Name:", fg=fg_color, bg=bg_color, font=custom_font)
+label_packagename.pack()
+
+entry_packagename = tk.Entry(root, bg=entry_bg_color, fg=entry_fg_color, font=custom_font)
+entry_packagename.pack(fill=tk.X)
+
+# File Path input, TRY ADDING THAT BROWSE BUTTON
+label_filepath = tk.Label(root, text="File Path:", fg=fg_color, bg=bg_color, font=custom_font)
+label_filepath.pack()
+
+entry_filepath = tk.Entry(root, bg=entry_bg_color, fg=entry_fg_color, font=custom_font)
+entry_filepath.pack(fill=tk.X)
 
 
-    subprocess.call(['ros2','pkg','create','--build-type','ament_cmake',package_name])
-    urdf_path = os.path.join(main_path,urdf_relative_path) 
+# Radio Buttons for Gazebo Type
+label_gazebo = tk.Label(root, text="Simulator of Choice:", fg=fg_color, bg=bg_color, font=custom_font)
+label_gazebo.pack()
 
-    pkg_path = os.path.join(main_path,package_name)
-    os.chdir(pkg_path)
+radio_var = tk.StringVar()
+radio_var.set("Ignition Gazebo")  # Default selection
 
-    # os.rmdir("include")
-    # os.rmdir("src")
+radio1 = tk.Radiobutton(root, text="Ignition Gazebo", variable=radio_var, value="Ignition Gazebo",
+                        fg=fg_color, bg=bg_color, font=custom_font, selectcolor=bg_color)
+radio1.pack()
 
-    pkg_launch_path = os.path.join(pkg_path,"launch") # Inside created pkg
-    pkg_urdf_path = os.path.join(pkg_path,"urdf") # Inside created pkg
-    pkg_config_path = os.path.join(pkg_path,"config") #Inside created pkg
-    pkg_rviz_path = os.path.join(pkg_path,"rviz") #Inside created pkg
-    pkg_meshes_path = os.path.join(pkg_path,"meshes") #Inside created pkg
-    pkg_env_hooks_path = os.path.join(pkg_path,"env-hooks") # Inside created pkg
+radio2 = tk.Radiobutton(root, text="Gazebo Classic", variable=radio_var, value="Gazebo Classic",
+                        fg=fg_color, bg=bg_color, font=custom_font, selectcolor=bg_color)
+radio2.pack()
 
-    launch_automaton_path = os.path.join(main_path,launch_file) # In source
-    urdf_automaton_path = os.path.join(main_path,"urdf") # In source
-    rviz_automaton_path = os.path.join(main_path,"default.rviz")
-    meshes_automaton_path = os.path.join(main_path,"meshes")
+# Radio Buttons for Joint State Publisher
 
-    os.mkdir(pkg_launch_path)
-    os.mkdir(pkg_config_path)
-    os.mkdir(pkg_rviz_path)
+label_jsp = tk.Label(root, text="Launch Joint State Publisher GUI to test your joints?", fg=fg_color, bg=bg_color, font=custom_font)
+label_jsp.pack()
 
-    if os.path.isdir(urdf_automaton_path): # If a URDF folder already exists
-        shutil.copytree(urdf_automaton_path,pkg_urdf_path,dirs_exist_ok=True) # Copies entire urdf folder content into the urdf folder of pkg
-    
-    else: # If just one urdf, create a directory in pkg and copies the file
-        os.mkdir(pkg_urdf_path)
-        shutil.copy(urdf_path,pkg_urdf_path)
+radio_jsp = tk.StringVar()
+radio_jsp.set("YES")  # Default selection
 
-    if os.path.isdir(meshes_automaton_path): # Only if you have additional meshes, it'll create a folder in the pkg
-        shutil.copytree(meshes_automaton_path,pkg_meshes_path,dirs_exist_ok=True)
-        meshes_available=True
-        os.mkdir(pkg_env_hooks_path)
-        env_hook_file = os.path.join(main_path,pkg_env_hooks_path,f"{package_name}.sh.in")
-        with open(env_hook_file,'w') as file:
-            file.writelines('ament_prepend_unique_value GAZEBO_MODEL_PATH "@CMAKE_INSTALL_PREFIX@/share"')
-            file.write("\n")
-            file.writelines('ament_prepend_unique_value GZ_SIM_RESOURCE_PATH "@CMAKE_INSTALL_PREFIX@/share"')
-            file.write("\n")
-            file.writelines('ament_prepend_unique_value IGN_GAZEBO_RESOURCE_PATH "@CMAKE_INSTALL_PREFIX@/share"')
+radio1 = tk.Radiobutton(root, text="YES", variable=radio_jsp, value="YES",
+                        fg=fg_color, bg=bg_color, font=custom_font, selectcolor=bg_color)
+radio1.pack()
 
-    
+radio2 = tk.Radiobutton(root, text="NO", variable=radio_jsp, value="NO",
+                        fg=fg_color, bg=bg_color, font=custom_font, selectcolor=bg_color)
+radio2.pack()
 
-    shutil.copy(launch_automaton_path,pkg_launch_path) # Copies launch file to launch folder inside the pkg
-    shutil.copy(rviz_automaton_path,pkg_rviz_path) # Copies default rviz config into config folder
-    os.remove(launch_automaton_path)
-    
-    return meshes_available
-    
-questions = {}
-questions['package_name'] = 'Your ROS Package Name (named autogen_pkg by DEFAULT) : '
-questions['urdf_relative_path'] = "Path to the URDF relative from the ROS_Autogen Repo, something like urdf/.... \n\nPath to the URDF :  "
-questions['simulator_used'] = "Simulator of Choice: Currently Supported are \n\n 1)  Ignition_gazebo \n\n 2)  Gazebo Classic (DEFAULT) \n\n 1 or 2: "
-questions['nodes'] = "Nodes of Choice:"
-questions['jsp-gui'] = "Do you want to test your joints with the joint state publisher GUI? \n Y or N: "
-# questions['meshes'] = "Would you be using meshes/worlds now or in the future, Y/N? \n Autogen will create an env hook for you, \n so that gazebo can recognise the meshes and worlds for you. RECOMMENDED "
-checker = 1 # Not required for now
-dir_list = ["include", "launch", "src", "urdf","config", "rviz","meshes"]
-script_list = [] # Until nodes start coming
-package_name = "autogen_pkg"
-package_name = input_func(questions['package_name'],checker)
-print("\n")
-urdf_relative_path = input_func(questions['urdf_relative_path'],checker)
-base_name, extension = os.path.splitext(urdf_relative_path)
-print(base_name)
-print("\n")
-sim_name = input_func(questions['simulator_used'],checker)
-print("\n")
-# meshes_required = input_func(questions['meshes'],checker)
-jsp_gui = input_func(questions['jsp-gui'],checker)
-jsp_gui = 1 if jsp_gui =="Y" or jsp_gui == "y" else 0
-if jsp_gui:
-    print("Make sure to install Joint_state_publisher_gui")
-print("\n")
+# Submit button
+submit_button = tk.Button(root, text="Submit", command=get_inputs, fg=fg_color, bg=bg_color, font=custom_font)
+submit_button.pack()
 
-mesh_include = False
-simulators = {"1":"Ignition Gazebo","2":"Gazebo Classic"}
+# Bind the window resize event to the function
+# root.bind("<Configure>", on_window_resize)
 
-
-
-print(" \n ***********************************  ROS_AUTOGEN PROCESSING********************************* \n ")
-
-# print("\n \n A New Package named",package_name,"with Robot State Publisher, Joint State Publisher, Rviz and",simulators[sim_name],"coming right up ! \n \n ")
-
-launch_file = f"{package_name}.launch.py"
-launch_generator(package_name,urdf_relative_path,sim_name,jsp_gui)
-meshes_available = pkg_creator(package_name,launch_file,urdf_relative_path)
-# if meshes_available or meshes_required=="Y" or meshes_required=="y":
-#     print("meshes support will be added")
-#     dir_list.append("meshes")
-#     mesh_include = True
-appender(dir_list,script_list) #Make sure the previous func brings you into the pkg dir
-
-print(f"Your Package is complete and called {package_name}. Make sure to copy it in colcon workspace and build")
+# Start the main loop
+root.mainloop()

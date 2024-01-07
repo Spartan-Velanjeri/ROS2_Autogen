@@ -39,7 +39,7 @@ import xacro
 
 def robot_node_gen(urdf_relative_path,package_name,sim_name,jsp_gui):
     file_name = os.path.basename(urdf_relative_path)
-    if sim_name == "1":
+    if sim_name == "Ignition Gazebo":
         entity = f"""
     spawn_entity = Node(
     package='ros_gz_sim',
@@ -105,7 +105,7 @@ def robot_node_gen(urdf_relative_path,package_name,sim_name,jsp_gui):
 
 def gazebo_node_gen(sim_name):
 
-    if sim_name == '1':
+    if sim_name == 'Ignition Gazebo':
     
         gazebo_stuff = f"""
     bridge = Node(
@@ -164,7 +164,7 @@ def node_return(sim_name,jsp_gui):
         node_robot_state_publisher,
         node_joint_state_publisher,
     """
-    if sim_name == "1":
+    if sim_name == "Ignition Gazebo":
         sim_nodes = f"""
         bridge,
         launch_gazebo_world,
