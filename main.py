@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import font
 from generator import generator
+import os
 
 def get_inputs():
     package_name = entry_packagename.get()
@@ -54,8 +55,31 @@ label_filepath = tk.Label(root, text="File Path:", fg=fg_color, bg=bg_color, fon
 label_filepath.pack()
 
 entry_filepath = tk.Entry(root, bg=entry_bg_color, fg=entry_fg_color, font=custom_font)
-entry_filepath.pack(fill=tk.X)
+# entry_filepath.pack(fill=tk.X)
 
+# file dialog / browse urdf file
+
+from tkinter import ttk
+from tkinter import filedialog as fd
+from tkinter.messagebox import showinfo
+
+# entry_filepath = tk.Entry(root, bg=entry_bg_color, fg=entry_fg_color, font=custom_font)
+# entry_filepath.pack(fill=tk.X)
+# entry_filepath.grid(row=2, column=2)
+
+def browsefunc():
+    filename =fd.askopenfilename(filetypes=(("urdf xacro files","*.xacro"), ("urdf files","*.urdf"), ("All files","*.*")))
+    rel_filepath = os.path.relpath(filename, os.getcwd()) 
+    entry_filepath.insert(tk.END, rel_filepath) # add this
+
+entry_filepath_button = tk.Button(root, text="select_file", command=browsefunc, fg=fg_color, bg=bg_color, font=custom_font)
+# entry_filepath_button.grid(row=2, column=8)
+
+entry_filepath.pack(fill=tk.X)
+entry_filepath_button.pack()
+
+urdf_file_path = entry_filepath.get()
+print(urdf_file_path)
 
 # Radio Buttons for Gazebo Type
 label_gazebo = tk.Label(root, text="Simulator of Choice:", fg=fg_color, bg=bg_color, font=custom_font)
