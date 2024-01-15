@@ -69,6 +69,7 @@ def pkg_creator(package_name,launch_file,urdf_relative_path):
     urdf_automaton_path = os.path.join(main_path,"urdf") # In source
     rviz_automaton_path = os.path.join(main_path,"default.rviz")
     meshes_automaton_path = os.path.join(main_path,"meshes")
+    config_automaton_path = os.path.join(main_path,"config")
 
     os.mkdir(pkg_launch_path)
     os.mkdir(pkg_config_path)
@@ -93,6 +94,9 @@ def pkg_creator(package_name,launch_file,urdf_relative_path):
             file.write("\n")
             file.writelines('ament_prepend_unique_value IGN_GAZEBO_RESOURCE_PATH "@CMAKE_INSTALL_PREFIX@/share"')
 
+
+    if os.path.isdir(config_automaton_path): # If a config folder already exists
+        shutil.copytree(config_automaton_path,pkg_config_path,dirs_exist_ok=True) # Copies entire config folder content into the config folder of pkg
     
 
     shutil.copy(launch_automaton_path,pkg_launch_path) # Copies launch file to launch folder inside the pkg
