@@ -50,11 +50,11 @@ pip install send2trash
 
    I'll be demonstrating the use of these repo with two examples: 
    * A Standalone URDF file without any meshes. I've taken the example from [gz_ros2_control](https://github.com/ros-controls/gz_ros2_control/blob/master/gz_ros2_control_demos/urdf/test_diff_drive.xacro.urdf)
-    ![diff_drive](https://github.com/Spartan-Velanjeri/ROS2_Autogen/assets/26743932/d65591bb-0d99-40aa-9743-d95d3460f75d)
+    ![diff_drive](https://github.com/Spartan-Velanjeri/ROS2_Autogen/assets/26743932/d65591bb-0d99-40aa-9743-d95d3460f75d)  
 
 
    * An URDF with meshes. I've used the MiR 100 Robot developed as a community project. You can check it out [here](https://github.com/relffok/mir_robot/tree/humble-devel/mir_description)
-   ![mir100](https://github.com/Spartan-Velanjeri/ROS2_Autogen/assets/26743932/a790612d-d042-47a5-8707-9bdc2b242135)
+   ![mir100](https://github.com/Spartan-Velanjeri/ROS2_Autogen/assets/26743932/a790612d-d042-47a5-8707-9bdc2b242135)  
    
 Each step will be tried with these two examples. You can choose the suitable method based on your requirement. 
 
