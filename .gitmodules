@@ -1,0 +1,3 @@
+[submodule "TkNodeSystem"]
+	path = TkNodeSystem
+	url = https://github.com/Akascape/TkNodeSystem.git

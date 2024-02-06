@@ -173,3 +173,6 @@ xacro to just .urdf
 
 There's no need to change anything with Ignition Gazebo as it can work with both .urdf and .urdf.xacro.
 
+## Tkinter based gui nodes 
+
+refer: [tkinter ros gui dev notes](./tk_nodes_notes.md)
