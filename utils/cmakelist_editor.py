@@ -9,7 +9,7 @@ def include_directory(dir_list): # Adds all Install directories
 
 def include_scripts(script_list): # Adds all Install programs
     all_scripts = '\n\t'.join(script_list)
-    appended_scripts = f"install(\n\tPROGRAMS\n\t{all_scripts}\n\tDESTINATION share/${{PROJECT_NAME}}\n)\n"
+    appended_scripts = f"install(\n\tPROGRAMS\n\t{all_scripts}\n\tDESTINATION lib/${{PROJECT_NAME}}\n)\n" # Add the Python Scripts under this after making them exe
     return appended_scripts
 
 def include_env_hooks():
